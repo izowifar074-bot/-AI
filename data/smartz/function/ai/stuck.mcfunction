@@ -36,9 +36,15 @@ scoreboard players operation #dz sz.posz *= #dz sz.posz
 scoreboard players operation #dsq sz.stuck = #dx sz.posx
 scoreboard players operation #dsq sz.stuck += #dy sz.posy
 scoreboard players operation #dsq sz.stuck += #dz sz.posz
-# 已经贴近目标（距离²<=2）→ 不算受阻
-execute if score #dsq sz.stuck matches ..2 run scoreboard players set @s sz.stuck 0
-execute if score #dsq sz.stuck matches ..2 run return 0
+# 水平距离²（决策与"是否已贴近"判定共用）
+scoreboard players operation #hsq sz.stuck = #dx sz.posx
+scoreboard players operation #hsq sz.stuck += #dz sz.posz
+# 真正贴近且大致同高（可直接近战）→ 不建造，交给 PVP 处理。
+# 关键：只有横向紧贴(hsq<=1)且落差很小(|dh|<=1)才算到达；
+# 若隔着横向间隙(hsq>=2)或有落差(|dh|>=2)则继续搭/挖，
+# 避免僵尸在玩家边上一格因"直线距离够近"而永久停住（旧 bug）。
+execute if score #hsq sz.stuck matches ..1 if score #dh sz.posy matches -1..1 run scoreboard players set @s sz.stuck 0
+execute if score #hsq sz.stuck matches ..1 if score #dh sz.posy matches -1..1 run return 0
 # 与历史最近距离比较：变近 = 有进展
 scoreboard players operation #delta sz.stuck = @s sz.posx
 scoreboard players operation #delta sz.stuck -= #dsq sz.stuck
@@ -51,15 +57,13 @@ execute if score @s sz.stuck matches 12.. run scoreboard players set @s sz.stuck
 # 决策。#built 标记本轮是否已放置方块，放了方块就不再触发挖掘，
 # 防止转头把自己刚放的方块啃掉。#hsq = 与目标的水平距离²。
 # 目标在上方>=2 → 垫高；同层 → 定向搭路；
-# 目标在下方>=2：水平未对齐 → 在自己这层搭路横向逼近，
-#                已到头顶(水平距离<=2) → 拆脚下方块天降打击；
+# 目标在下方>=2：未到正上方(hsq>=2) → 在自己这层搭路横向逼近，
+#                已到正上方(hsq<=1) → 拆脚下方块天降打击；
 # 普通挖掘只在目标不低于自己 1 格以上时触发（dh >= -1）
 scoreboard players set #built sz.stuck 0
-scoreboard players operation #hsq sz.stuck = #dx sz.posx
-scoreboard players operation #hsq sz.stuck += #dz sz.posz
 execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
 execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches -1..1 if score #build sz.config matches 1 run function smartz:ai/build/bridge
-execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches 5.. if score #build sz.config matches 1 run function smartz:ai/build/bridge
-execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches ..4 if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/down
+execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/bridge
+execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches ..1 if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/down
 execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches -1.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
 execute if score @s sz.stuck matches 3.. run scoreboard players set @s sz.stuck 1
