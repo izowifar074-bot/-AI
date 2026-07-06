@@ -26,5 +26,10 @@ scoreboard players operation @s sz.posy = #cury sz.posy
 scoreboard players operation @s sz.posz = #curz sz.posz
 scoreboard players set #go sz.stuck 0
 execute on target if entity @s[distance=2.5..] run scoreboard players set #go sz.stuck 1
+execute on target store result score #ty sz.posy run data get entity @s Pos[1]
+scoreboard players operation #dy sz.posy = #ty sz.posy
+scoreboard players operation #dy sz.posy -= #cury sz.posy
+execute if score @s sz.stuck matches 5.. if score #go sz.stuck matches 1 if score #dy sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
+execute if score @s sz.stuck matches 5.. if score #go sz.stuck matches 1 if score #dy sz.posy matches -1..1 if score #build sz.config matches 1 run function smartz:ai/build/bridge
 execute if score @s sz.stuck matches 5.. if score #go sz.stuck matches 1 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
-execute if score @s sz.stuck matches 5.. run scoreboard players set @s sz.stuck 0
+execute if score @s sz.stuck matches 5.. run scoreboard players set @s sz.stuck 3
