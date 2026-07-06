@@ -5,3 +5,16 @@
 #   2. 移除所有僵尸身上的 sz.* 标签
 #   3. 输出卸载完成提示，提醒玩家移除数据包文件后 /reload
 # ============================================================
+scoreboard objectives remove sz.clock
+scoreboard objectives remove sz.id
+scoreboard objectives remove sz.config
+scoreboard objectives remove sz.posx
+scoreboard objectives remove sz.posy
+scoreboard objectives remove sz.posz
+scoreboard objectives remove sz.stuck
+scoreboard objectives remove sz.mine
+scoreboard objectives remove sz.cool
+tag @e remove sz.init
+tag @e remove sz.alerted
+tag @e remove sz.mining
+tellraw @a {"text":"[智能僵尸] 卸载完成","color":"red"}
