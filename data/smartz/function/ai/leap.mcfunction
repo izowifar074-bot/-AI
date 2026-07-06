@@ -6,3 +6,11 @@
 #      实现方法：execute facing entity 目标 + 局部坐标 ^ ^ ^ 计算方向
 #   3. 播放跳跃音效，设置冷却 sz.cool（约 3 秒）
 # ============================================================
+execute if score @s sz.cool matches 1.. run return 0
+scoreboard players set #go sz.stuck 0
+execute on target if entity @s[distance=2..4] run scoreboard players set #go sz.stuck 1
+execute if score #go sz.stuck matches 0 run return 0
+effect give @s minecraft:speed 1 3 true
+effect give @s minecraft:jump_boost 1 2 true
+playsound minecraft:entity.zombie.attack hostile @a ~ ~ ~ 1 0.8
+scoreboard players set @s sz.cool 8
