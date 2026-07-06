@@ -11,3 +11,20 @@
 #      - 前方悬空(前下方是空气) 且 #build 开 → ai/build/bridge
 #   4. 触发任一行为后 sz.stuck 归零
 # ============================================================
+execute if score @s sz.mine matches 1.. run return 0
+execute store result score #curx sz.posx run data get entity @s Pos[0]
+execute store result score #cury sz.posy run data get entity @s Pos[1]
+execute store result score #curz sz.posz run data get entity @s Pos[2]
+scoreboard players set #same sz.stuck 1
+execute unless score #curx sz.posx = @s sz.posx run scoreboard players set #same sz.stuck 0
+execute unless score #cury sz.posy = @s sz.posy run scoreboard players set #same sz.stuck 0
+execute unless score #curz sz.posz = @s sz.posz run scoreboard players set #same sz.stuck 0
+execute if score #same sz.stuck matches 1 run scoreboard players add @s sz.stuck 1
+execute if score #same sz.stuck matches 0 run scoreboard players set @s sz.stuck 0
+scoreboard players operation @s sz.posx = #curx sz.posx
+scoreboard players operation @s sz.posy = #cury sz.posy
+scoreboard players operation @s sz.posz = #curz sz.posz
+scoreboard players set #go sz.stuck 0
+execute on target if entity @s[distance=2.5..] run scoreboard players set #go sz.stuck 1
+execute if score @s sz.stuck matches 5.. if score #go sz.stuck matches 1 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
+execute if score @s sz.stuck matches 5.. run scoreboard players set @s sz.stuck 0
