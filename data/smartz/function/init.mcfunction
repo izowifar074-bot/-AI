@@ -11,3 +11,12 @@
 #   3. 分配唯一编号：从 #next_id sz.id 取值并自增
 #   4. 打上 tag sz.init 防止重复初始化
 # ============================================================
+attribute @s minecraft:follow_range base set 64
+attribute @s minecraft:movement_speed base set 0.28
+attribute @s minecraft:knockback_resistance base set 0.3
+attribute @s minecraft:step_height base set 1.0
+attribute @s minecraft:spawn_reinforcements base set 0.35
+data merge entity @s {CanBreakDoors:1b}
+scoreboard players operation @s sz.id = #next_id sz.id
+scoreboard players add #next_id sz.id 1
+tag @s add sz.init
