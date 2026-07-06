@@ -7,3 +7,6 @@
 #   4. 执行 ai/hazard（危险规避，始终开启）
 # 注意：卡住检测(stuck)与警报(alert)由 tick 单独分频调度，不在此处
 # ============================================================
+execute if score @s sz.mine matches 1.. run function smartz:ai/dig/mine
+execute if score @s sz.mine matches 1.. run return 0
+execute if score @s sz.cool matches 1.. run scoreboard players remove @s sz.cool 1
