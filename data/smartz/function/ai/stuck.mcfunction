@@ -1,17 +1,24 @@
 # ============================================================
-# smartz:ai/stuck — 追击受阻检测（executor = 僵尸，每 8gt 一次）
-# 这是"挖/搭/垫"三大地形交互的唯一触发器。
+# smartz:ai/stuck — 追击受阻检测与决策（executor = 僵尸，每 8gt 一次）
 # 判定标准：与攻击目标的距离²不再创新低 = 没有进展。
-# （旧版按"坐标完全不动"判定，僵尸在障碍下踱步会不停清零计数，
-#   导致永不触发，已废弃。）
 # @s sz.posx 存储该僵尸的历史最近距离²（init 时置为极大值）。
-# 无进展计数累到 3（约1.2秒）触发决策，之后回落到 1 保持
-# 每 16gt 重新决策的节奏。
+#
+# 计数器 @s sz.stuck 只在真正取得进展或失去目标时清零，
+# 决策本身不重置它（旧版决策后重置为 1，导致 12 阈值的基线
+# 重置永远达不到，是死代码）。分层响应：
+#   >=3  常规决策（按高度差路由：垫高/搭路/俯冲/挖掘）
+#   >=8  顽固卡死升级：无视高度路由，能试的全试一遍
+#   >=12 重置距离基线（防击退等造成基线失真），回落到 6 保持升级档
+#
+# 攀爬模式（tag sz.climb）：目标在上方>=2 且受阻时进入，冻结
+# 原版走动（-100% 移速修饰符），每周期垫高一格；到达高度/失去
+# 目标/建造关闭时解除。防止原版寻路把僵尸带歪、带下塔。
 # ============================================================
 execute if score @s sz.mine matches 1.. run return 0
-# 无目标 → 清零退出
+# 无目标 → 解除攀爬冻结、清零退出
 scoreboard players set #go sz.stuck 0
 execute on target run scoreboard players set #go sz.stuck 1
+execute if score #go sz.stuck matches 0 run function smartz:ai/climb_off
 execute if score #go sz.stuck matches 0 run scoreboard players set @s sz.stuck 0
 execute if score #go sz.stuck matches 0 run return 0
 # 自身与目标的整数坐标
@@ -39,29 +46,34 @@ scoreboard players operation #dsq sz.stuck += #dz sz.posz
 # 水平距离²（供高空/俯冲决策使用）
 scoreboard players operation #hsq sz.stuck = #dx sz.posx
 scoreboard players operation #hsq sz.stuck += #dz sz.posz
-# 注意：不再用"距离够近就停"的短路。旧版一旦判定"到达"就停止
-# 一切建造，导致僵尸被困在最后一格缺口/斜对角处永久干站。
-# 现在改为完全依赖各建造/挖掘函数自身的前置条件——真正贴到
-# 玩家身边时它们会自然空转，隔着缺口时则会把缺口封上。
 # 与历史最近距离比较：变近 = 有进展
 scoreboard players operation #delta sz.stuck = @s sz.posx
 scoreboard players operation #delta sz.stuck -= #dsq sz.stuck
 execute if score #delta sz.stuck matches 1.. run scoreboard players set @s sz.stuck 0
 execute if score #delta sz.stuck matches 1.. run scoreboard players operation @s sz.posx = #dsq sz.stuck
 execute if score #delta sz.stuck matches ..0 run scoreboard players add @s sz.stuck 1
-# 被击退等导致基线失真：长期无进展就以当前距离重设基线
+# 长期无进展 → 基线重置（防击退失真），回落到 6 保持升级档循环
 execute if score @s sz.stuck matches 12.. run scoreboard players operation @s sz.posx = #dsq sz.stuck
-execute if score @s sz.stuck matches 12.. run scoreboard players set @s sz.stuck 3
-# 决策。#built 标记本轮是否已放置方块，放了方块就不再触发挖掘，
-# 防止转头把自己刚放的方块啃掉。#hsq = 与目标的水平距离²。
-# 目标在上方>=2 → 垫高；同层 → 定向搭路；
-# 目标在下方>=2：未到正上方(hsq>=2) → 在自己这层搭路横向逼近，
-#                已到正上方(hsq<=1) → 拆脚下方块天降打击；
-# 普通挖掘只在目标不低于自己 1 格以上时触发（dh >= -1）
+execute if score @s sz.stuck matches 12.. run scoreboard players set @s sz.stuck 6
+# 攀爬模式维护：到达目标高度或建造被关闭 → 解冻还权给原版寻路
+execute if score #dh sz.posy matches ..1 run function smartz:ai/climb_off
+execute if score #build sz.config matches 0 run function smartz:ai/climb_off
+# ---------- 决策 ----------
+# #built 标记本轮是否已放置方块，放了就不再触发挖掘，
+# 防止转头啃掉自己刚放的方块
 scoreboard players set #built sz.stuck 0
-execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
+# 目标在上方>=2 且受阻 → 进入攀爬模式
+execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/climb_on
+# 攀爬模式：每周期垫高（节奏由 sz.cool 控制，不依赖计数器）
+execute if entity @s[tag=sz.climb] if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
+# 同层受阻 → 定向搭路
 execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches -1..1 if score #build sz.config matches 1 run function smartz:ai/build/bridge
+# 目标在下方>=2：未到正上方 → 横向搭路逼近；已到正上方 → 天降
 execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/bridge
 execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches ..1 if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/down
+# 普通挖掘（目标不低于自己 1 格以上时）
 execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches -1.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
-execute if score @s sz.stuck matches 3.. run scoreboard players set @s sz.stuck 1
+# ---------- 顽固卡死升级（约3秒仍无进展）：无视高度路由全试 ----------
+execute if score @s sz.stuck matches 8.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
+execute if score @s sz.stuck matches 8.. if score #build sz.config matches 1 run function smartz:ai/build/bridge
+execute if score @s sz.stuck matches 8.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide

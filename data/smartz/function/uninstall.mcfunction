@@ -19,5 +19,7 @@ tag @e remove sz.init
 tag @e remove sz.vip
 tag @e remove sz.alerted
 tag @e remove sz.mining
+execute as @e[type=minecraft:zombie,tag=sz.climb] run attribute @s minecraft:movement_speed modifier remove smartz:freeze
+tag @e remove sz.climb
 kill @e[type=minecraft:marker,tag=sz.target]
 tellraw @a {"text":"[智能僵尸] 卸载完成","color":"red"}
