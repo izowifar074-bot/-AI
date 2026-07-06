@@ -9,10 +9,16 @@
 # ============================================================
 execute if score @s sz.pcd matches 1.. run scoreboard players remove @s sz.pcd 1
 execute if score @s sz.bcd matches 1.. run scoreboard players remove @s sz.bcd 1
-# --- 被控举盾：短窗口内两次受击（HurtTime 采样 >=6 视为新受击）---
-execute store result score #ht sz.stuck run data get entity @s HurtTime
-execute if score #ht sz.stuck matches 6.. if score @s sz.hurt matches 0.. run scoreboard players add @s sz.hurt 12
-execute if score #ht sz.stuck matches ..5 if score @s sz.hurt matches 1.. run scoreboard players remove @s sz.hurt 2
+# --- 被控举盾：血量下降 >=1.0 才算真受击 ---
+# （不能用 HurtTime：嗅探/目标传染的 0.0001 归因伤同样会刷新它，
+#   僵尸会被自家脉冲反复触发格挡，表现为莫名减速与呆滞）
+execute store result score #hp sz.stuck run data get entity @s Health 10
+execute unless score @s sz.hp = @s sz.hp run scoreboard players operation @s sz.hp = #hp sz.stuck
+scoreboard players operation #hpd sz.stuck = @s sz.hp
+scoreboard players operation #hpd sz.stuck -= #hp sz.stuck
+scoreboard players operation @s sz.hp = #hp sz.stuck
+execute if score #hpd sz.stuck matches 10.. if score @s sz.hurt matches 0.. run scoreboard players add @s sz.hurt 12
+execute if score #hpd sz.stuck matches ..9 if score @s sz.hurt matches 1.. run scoreboard players remove @s sz.hurt 2
 execute if score @s sz.hurt matches ..-1 run scoreboard players add @s sz.hurt 2
 execute if score @s sz.hurt matches 20.. run function smartz:ai/pvp/guard
 # --- 珍珠飞行倒计时 ---

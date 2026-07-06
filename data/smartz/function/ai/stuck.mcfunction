@@ -47,6 +47,14 @@ scoreboard players operation #dsq sz.stuck += #dz sz.posz
 # 水平距离²（供高空/俯冲决策使用）
 scoreboard players operation #hsq sz.stuck = #dx sz.posx
 scoreboard players operation #hsq sz.stuck += #dz sz.posz
+# 已进入近战射程（3D 距离²<=8，约 2.8 格；近战射线可达 3.5 格）
+# → 交给 PVP 层解决，地形系统退出。若无此豁免，贴身缠斗的僵尸
+# 永远"无进展"，计数涨到升级档后会在平地上莫名垫高/起塔。
+# （早前"隔一格干站"的真因是转身瞄准缺失，已修，豁免可安全恢复）
+execute if score #dsq sz.stuck matches ..8 run function smartz:ai/climb_off
+execute if score #dsq sz.stuck matches ..8 run tag @s remove sz.pave
+execute if score #dsq sz.stuck matches ..8 run scoreboard players set @s sz.stuck 0
+execute if score #dsq sz.stuck matches ..8 run return 0
 # 与历史最近距离比较：变近 = 有进展
 scoreboard players operation #delta sz.stuck = @s sz.posx
 scoreboard players operation #delta sz.stuck -= #dsq sz.stuck
@@ -79,7 +87,9 @@ execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches ..-2 if sc
 execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches ..1 if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/down
 # 普通挖掘（目标不低于自己 1 格以上时）
 execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches -1.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
-# ---------- 顽固卡死升级（约3秒仍无进展）：无视高度路由全试 ----------
-execute if score @s sz.stuck matches 8.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
+# ---------- 顽固卡死升级（约3秒仍无进展）：放宽路由全试 ----------
+# 垫高仍要求目标在上方（dh>=1）——目标不在上方时垫高毫无意义，
+# 只会在平地凭空起塔
+execute if score @s sz.stuck matches 8.. if score #dh sz.posy matches 1.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
 execute if score @s sz.stuck matches 8.. if score #build sz.config matches 1 run function smartz:ai/build/bridge
 execute if score @s sz.stuck matches 8.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide

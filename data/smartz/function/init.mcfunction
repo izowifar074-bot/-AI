@@ -27,4 +27,5 @@ data merge entity @s {drop_chances:{mainhand:0.0f,offhand:0.0f}}
 scoreboard players operation @s sz.id = #next_id sz.id
 scoreboard players add #next_id sz.id 1
 scoreboard players set @s sz.posx 999999999
+scoreboard players set @s sz.pcd 150
 tag @s add sz.init

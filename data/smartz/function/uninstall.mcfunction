@@ -19,6 +19,7 @@ scoreboard objectives remove sz.hurt
 scoreboard objectives remove sz.pcd
 scoreboard objectives remove sz.prl
 scoreboard objectives remove sz.bcd
+scoreboard objectives remove sz.hp
 data remove storage smartz:tmp
 tag @e remove sz.init
 tag @e remove sz.vip
