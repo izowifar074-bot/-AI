@@ -12,6 +12,7 @@
 scoreboard players add #tick sz.clock 1
 execute if score #master sz.config matches 0 run return 0
 execute as @e[type=minecraft:zombie,tag=!sz.init] at @s run function smartz:init
+execute if score #pvp sz.config matches 1 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..8,gamemode=!creative,gamemode=!spectator] run function smartz:ai/pvp/attack
 scoreboard players operation #mod4 sz.clock = #tick sz.clock
 scoreboard players operation #mod4 sz.clock %= #c4 sz.clock
 execute if score #mod4 sz.clock matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/core
