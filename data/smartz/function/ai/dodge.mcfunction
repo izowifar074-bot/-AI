@@ -7,3 +7,9 @@
 #   3. 近战贴身（距离 < 3）时施加小幅侧向拉扯
 #   4. 用 sz.cool 冷却防止每刻都推，导致原地抖动
 # ============================================================
+execute unless entity @a[distance=..24,predicate=smartz:aiming_player] run return 0
+scoreboard players operation #par sz.clock = #tick sz.clock
+scoreboard players operation #par sz.clock += @s sz.id
+scoreboard players operation #par sz.clock %= #c16 sz.clock
+execute if score #par sz.clock matches 0..7 positioned ^0.7 ^ ^ if block ~ ~ ~ minecraft:air if block ~ ~1 ~ minecraft:air run tp @s ^0.7 ^ ^
+execute if score #par sz.clock matches 8..15 positioned ^-0.7 ^ ^ if block ~ ~ ~ minecraft:air if block ~ ~1 ~ minecraft:air run tp @s ^-0.7 ^ ^
