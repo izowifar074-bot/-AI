@@ -20,6 +20,7 @@ scoreboard players set #next_id sz.id 0
 scoreboard players set #c4 sz.clock 4
 scoreboard players set #c8 sz.clock 8
 scoreboard players set #c20 sz.clock 20
+scoreboard players set #c16 sz.clock 16
 execute unless score #master sz.config = #master sz.config run scoreboard players set #master sz.config 1
 execute unless score #dig sz.config = #dig sz.config run scoreboard players set #dig sz.config 1
 execute unless score #build sz.config = #build sz.config run scoreboard players set #build sz.config 1
