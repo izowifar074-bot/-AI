@@ -19,6 +19,7 @@ execute if score @s sz.mine matches 1.. run return 0
 scoreboard players set #go sz.stuck 0
 execute on target run scoreboard players set #go sz.stuck 1
 execute if score #go sz.stuck matches 0 run function smartz:ai/climb_off
+execute if score #go sz.stuck matches 0 run tag @s remove sz.pave
 execute if score #go sz.stuck matches 0 run scoreboard players set @s sz.stuck 0
 execute if score #go sz.stuck matches 0 run return 0
 # 自身与目标的整数坐标
@@ -60,19 +61,24 @@ execute if score #dh sz.posy matches ..1 run function smartz:ai/climb_off
 execute if score #build sz.config matches 0 run function smartz:ai/climb_off
 # ---------- 决策 ----------
 # #built 标记本轮是否已放置方块，放了就不再触发挖掘，
-# 防止转头啃掉自己刚放的方块
+# 防止转头啃掉自己刚放的方块。触发阈值 2（约0.8秒反应）。
 scoreboard players set #built sz.stuck 0
 # 目标在上方>=2 且受阻 → 进入攀爬模式
-execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/climb_on
-# 攀爬模式：每周期垫高（节奏由 sz.cool 控制，不依赖计数器）
+execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/climb_on
+# 攀爬模式：持续垫高（也由 core 每 4gt 驱动，见 core.mcfunction）
 execute if entity @s[tag=sz.climb] if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
+# 搭路惯性（tag sz.pave，bridge 成功时自打/失败时自摘）：
+# 一旦开搭，只要路线成立就连续步进，不再等计数器重新累积——
+# 否则每步的进展都会清零计数器，导致每块间隔 1 秒以上，观感极慢
+execute if entity @s[tag=sz.pave] if score #dh sz.posy matches -1..1 if score #build sz.config matches 1 run function smartz:ai/build/bridge
+execute if entity @s[tag=sz.pave] if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/bridge
 # 同层受阻 → 定向搭路
-execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches -1..1 if score #build sz.config matches 1 run function smartz:ai/build/bridge
+execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches -1..1 if score #build sz.config matches 1 run function smartz:ai/build/bridge
 # 目标在下方>=2：未到正上方 → 横向搭路逼近；已到正上方 → 天降
-execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/bridge
-execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches ..1 if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/down
+execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/bridge
+execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches ..1 if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/down
 # 普通挖掘（目标不低于自己 1 格以上时）
-execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches -1.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
+execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches -1.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
 # ---------- 顽固卡死升级（约3秒仍无进展）：无视高度路由全试 ----------
 execute if score @s sz.stuck matches 8.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
 execute if score @s sz.stuck matches 8.. if score #build sz.config matches 1 run function smartz:ai/build/bridge

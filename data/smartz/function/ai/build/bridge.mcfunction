@@ -37,8 +37,10 @@ execute align xyz if score #stepx sz.posx matches 1 if block ~1 ~-1 ~ #minecraft
 execute align xyz if score #stepx sz.posx matches -1 if block ~-1 ~-1 ~ #minecraft:replaceable if block ~-1 ~ ~ #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~-1 ~-1 ~ minecraft:cobblestone
 execute align xyz if score #stepz sz.posz matches 1 if block ~ ~-1 ~1 #minecraft:replaceable if block ~ ~ ~1 #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~ ~-1 ~1 minecraft:cobblestone
 execute align xyz if score #stepz sz.posz matches -1 if block ~ ~-1 ~-1 #minecraft:replaceable if block ~ ~ ~-1 #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~ ~-1 ~-1 minecraft:cobblestone
+execute if score #bplaced sz.stuck matches 0 run tag @s remove sz.pave
 execute if score #bplaced sz.stuck matches 0 run return 0
 scoreboard players set #built sz.stuck 1
+tag @s add sz.pave
 # 踏步跟进：目的地脚部与头部两格无阻挡才挪，防止窒息
 execute if score #stepx sz.posx matches 1 align xyz if block ~1 ~ ~ #minecraft:replaceable if block ~1 ~1 ~ #minecraft:replaceable run tp @s ~1.5 ~ ~0.5
 execute if score #stepx sz.posx matches -1 align xyz if block ~-1 ~ ~ #minecraft:replaceable if block ~-1 ~1 ~ #minecraft:replaceable run tp @s ~-0.5 ~ ~0.5

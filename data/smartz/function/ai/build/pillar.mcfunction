@@ -16,5 +16,5 @@ execute unless block ~ ~ ~ #minecraft:replaceable run return 0
 execute align xyz run tp @s ~0.5 ~1 ~0.5
 execute align xyz run setblock ~ ~ ~ minecraft:cobblestone
 playsound minecraft:block.stone.place block @a ~ ~ ~ 1 1
-scoreboard players set @s sz.cool 2
+scoreboard players set @s sz.cool 1
 scoreboard players set #built sz.stuck 1
