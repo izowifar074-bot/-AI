@@ -36,15 +36,13 @@ scoreboard players operation #dz sz.posz *= #dz sz.posz
 scoreboard players operation #dsq sz.stuck = #dx sz.posx
 scoreboard players operation #dsq sz.stuck += #dy sz.posy
 scoreboard players operation #dsq sz.stuck += #dz sz.posz
-# 水平距离²（决策与"是否已贴近"判定共用）
+# 水平距离²（供高空/俯冲决策使用）
 scoreboard players operation #hsq sz.stuck = #dx sz.posx
 scoreboard players operation #hsq sz.stuck += #dz sz.posz
-# 真正贴近且大致同高（可直接近战）→ 不建造，交给 PVP 处理。
-# 关键：只有横向紧贴(hsq<=1)且落差很小(|dh|<=1)才算到达；
-# 若隔着横向间隙(hsq>=2)或有落差(|dh|>=2)则继续搭/挖，
-# 避免僵尸在玩家边上一格因"直线距离够近"而永久停住（旧 bug）。
-execute if score #hsq sz.stuck matches ..1 if score #dh sz.posy matches -1..1 run scoreboard players set @s sz.stuck 0
-execute if score #hsq sz.stuck matches ..1 if score #dh sz.posy matches -1..1 run return 0
+# 注意：不再用"距离够近就停"的短路。旧版一旦判定"到达"就停止
+# 一切建造，导致僵尸被困在最后一格缺口/斜对角处永久干站。
+# 现在改为完全依赖各建造/挖掘函数自身的前置条件——真正贴到
+# 玩家身边时它们会自然空转，隔着缺口时则会把缺口封上。
 # 与历史最近距离比较：变近 = 有进展
 scoreboard players operation #delta sz.stuck = @s sz.posx
 scoreboard players operation #delta sz.stuck -= #dsq sz.stuck
