@@ -12,8 +12,8 @@
 #      - 把目标方块相对方位记录下来（推荐：在目标方块处 summon marker 并打专属 tag，
 #        marker 与僵尸用相同 sz.id 分数配对，避免僵尸转头后挖错方块）
 # ============================================================
-execute anchored eyes positioned ^ ^ ^0.8 align xyz unless block ~ ~ ~ minecraft:air unless block ~ ~ ~ minecraft:cave_air unless block ~ ~ ~ minecraft:water unless block ~ ~ ~ minecraft:lava unless block ~ ~ ~ #smartz:unbreakable run summon minecraft:marker ~ ~ ~ {Tags:["sz.target","sz.new"]}
-execute anchored eyes positioned ^ ^ ^0.8 align xyz if block ~ ~ ~ minecraft:air positioned ~ ~-1 ~ unless block ~ ~ ~ minecraft:air unless block ~ ~ ~ minecraft:cave_air unless block ~ ~ ~ minecraft:water unless block ~ ~ ~ minecraft:lava unless block ~ ~ ~ #smartz:unbreakable run summon minecraft:marker ~ ~ ~ {Tags:["sz.target","sz.new"]}
+execute anchored eyes positioned ^ ^ ^1 align xyz unless block ~ ~ ~ minecraft:air unless block ~ ~ ~ minecraft:cave_air unless block ~ ~ ~ minecraft:water unless block ~ ~ ~ minecraft:lava unless block ~ ~ ~ #smartz:unbreakable run summon minecraft:marker ~ ~ ~ {Tags:["sz.target","sz.new"]}
+execute anchored eyes positioned ^ ^ ^1 align xyz if block ~ ~ ~ minecraft:air positioned ~ ~-1 ~ unless block ~ ~ ~ minecraft:air unless block ~ ~ ~ minecraft:cave_air unless block ~ ~ ~ minecraft:water unless block ~ ~ ~ minecraft:lava unless block ~ ~ ~ #smartz:unbreakable run summon minecraft:marker ~ ~ ~ {Tags:["sz.target","sz.new"]}
 execute if entity @e[type=minecraft:marker,tag=sz.new] run scoreboard players operation @e[type=minecraft:marker,tag=sz.new,limit=1] sz.id = @s sz.id
 execute if entity @e[type=minecraft:marker,tag=sz.new] run tag @s add sz.mining
 execute if entity @e[type=minecraft:marker,tag=sz.new] run scoreboard players set @s sz.mine 10

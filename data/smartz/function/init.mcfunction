@@ -9,7 +9,8 @@
 #      - spawn_reinforcements = 0.35
 #   2. data merge 开启 CanBreakDoors
 #   3. 分配唯一编号：从 #next_id sz.id 取值并自增
-#   4. 打上 tag sz.init 防止重复初始化
+#   4. sz.posx 置为极大值（受阻检测的"历史最近距离²"基线）
+#   5. 打上 tag sz.init 防止重复初始化
 # ============================================================
 attribute @s minecraft:follow_range base set 64
 attribute @s minecraft:movement_speed base set 0.28
@@ -19,4 +20,5 @@ attribute @s minecraft:spawn_reinforcements base set 0.35
 data merge entity @s {CanBreakDoors:1b}
 scoreboard players operation @s sz.id = #next_id sz.id
 scoreboard players add #next_id sz.id 1
+scoreboard players set @s sz.posx 999999999
 tag @s add sz.init
