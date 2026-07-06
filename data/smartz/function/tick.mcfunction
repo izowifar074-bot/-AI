@@ -9,3 +9,15 @@
 #   6. 每 20gt：执行 ai/swarm/alert（警报广播）
 #   分频用 scoreboard players operation 取模实现
 # ============================================================
+scoreboard players add #tick sz.clock 1
+execute if score #master sz.config matches 0 run return 0
+execute as @e[type=minecraft:zombie,tag=!sz.init] at @s run function smartz:init
+scoreboard players operation #mod4 sz.clock = #tick sz.clock
+scoreboard players operation #mod4 sz.clock %= #c4 sz.clock
+execute if score #mod4 sz.clock matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/core
+scoreboard players operation #mod8 sz.clock = #tick sz.clock
+scoreboard players operation #mod8 sz.clock %= #c8 sz.clock
+execute if score #mod8 sz.clock matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/stuck
+scoreboard players operation #mod20 sz.clock = #tick sz.clock
+scoreboard players operation #mod20 sz.clock %= #c20 sz.clock
+execute if score #mod20 sz.clock matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/swarm/alert
