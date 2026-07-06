@@ -21,3 +21,4 @@ execute if score #mod8 sz.clock matches 0 as @e[type=minecraft:zombie,tag=sz.ini
 scoreboard players operation #mod20 sz.clock = #tick sz.clock
 scoreboard players operation #mod20 sz.clock %= #c20 sz.clock
 execute if score #mod20 sz.clock matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/swarm/alert
+execute if score #mod20 sz.clock matches 0 as @e[type=minecraft:marker,tag=sz.target] at @s unless entity @e[type=minecraft:zombie,tag=sz.mining,distance=..8] run kill @s
