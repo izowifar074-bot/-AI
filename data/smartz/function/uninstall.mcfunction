@@ -17,4 +17,5 @@ scoreboard objectives remove sz.cool
 tag @e remove sz.init
 tag @e remove sz.alerted
 tag @e remove sz.mining
+kill @e[type=minecraft:marker,tag=sz.target]
 tellraw @a {"text":"[智能僵尸] 卸载完成","color":"red"}
