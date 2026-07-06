@@ -15,6 +15,7 @@ scoreboard objectives add sz.posz dummy
 scoreboard objectives add sz.stuck dummy
 scoreboard objectives add sz.mine dummy
 scoreboard objectives add sz.cool dummy
+scoreboard objectives add sz.atk dummy
 scoreboard players set #tick sz.clock 0
 scoreboard players set #next_id sz.id 0
 scoreboard players set #c4 sz.clock 4
@@ -27,4 +28,5 @@ execute unless score #dig sz.config = #dig sz.config run scoreboard players set 
 execute unless score #build sz.config = #build sz.config run scoreboard players set #build sz.config 1
 execute unless score #swarm sz.config = #swarm sz.config run scoreboard players set #swarm sz.config 1
 execute unless score #dodge sz.config = #dodge sz.config run scoreboard players set #dodge sz.config 1
+execute unless score #pvp sz.config = #pvp sz.config run scoreboard players set #pvp sz.config 1
 tellraw @a {"text":"[智能僵尸] 已加载","color":"green"}

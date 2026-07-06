@@ -2,8 +2,9 @@
 
 适用版本：**Minecraft Java 1.21.10**（`pack_format: 89`）
 
-让所有僵尸拥有接近玩家的智能：隔墙索敌、挖方块破墙、搭桥过沟、垫方块爬高台、
-群体围攻、蛇皮走位闪避弓箭、跳劈、规避岩浆等危险。
+让所有僵尸拥有接近玩家的智能：隔墙索敌、挖方块破墙、定向搭路、垫方块爬高台、
+群体情报共享围攻、蛇皮走位闪避弓箭、规避岩浆等危险，以及持剑持盾的
+PVP 近战系统——攻击只在僵尸准星真正对准你时命中（射线判定，无杀戮光环）。
 
 ## 安装
 
@@ -20,6 +21,7 @@
 | `/function smartz:config/build_on` / `build_off` | 放置方块（搭桥/垫高） |
 | `/function smartz:config/swarm_on` / `swarm_off` | 群体协作 |
 | `/function smartz:config/dodge_on` / `dodge_off` | 闪避与走位 |
+| `/function smartz:config/pvp_on` / `pvp_off` | PVP 近战系统 |
 | `/function smartz:uninstall` | 完全卸载（清除记分板与标签） |
 
 ## 测试清单
@@ -31,8 +33,12 @@
 - [ ] 隔一条 3 格宽的沟 → 僵尸朝你的方向逐格铺路过来（斜向时走折线）
 - [ ] 绕自己挖一圈 1 格宽的壕沟 → 僵尸会把沟填平走过来
 - [ ] 手持弓瞄准远处僵尸 → 僵尸左右蛇皮走位
-- [ ] 一只僵尸发现你 → 附近僵尸集体加速围攻
+- [ ] 一只僵尸发现你 → 40 格内所有僵尸（含隔墙的）同时锁定你并加速围攻
 - [ ] 僵尸不会主动走进岩浆/仙人掌
+- [ ] 僵尸持铁剑+盾牌；近身时以约 0.8 秒节奏挥砍（有横扫粒子与音效），一击约 3.5 颗心
+- [ ] 举盾正对僵尸 → 攻击被格挡；但僵尸会环绕走位试图绕到侧后
+- [ ] 绕到僵尸背后贴脸 → 它没转过身之前打不到你（准星射线判定，无杀戮光环）
+- [ ] 疾跑逃离到 4~9 格 → 僵尸明显提速追击
 
 ## 架构总览
 
@@ -57,14 +63,18 @@ data/
         dodge.mcfunction       # 蛇皮走位闪避
         leap.mcfunction        # 近身跳劈
         hazard.mcfunction      # 危险方块规避
-        swarm/alert.mcfunction # 发现玩家 → 广播警报
-        swarm/respond.mcfunction # 响应警报：加速围攻 + 限量增援
+        swarm/alert.mcfunction # 发现玩家 → 咆哮 + 标记目标玩家并广播
+        swarm/respond.mcfunction # 响应警报：加速围攻 + 目标传染（共享情报，不刷怪）
+        pvp/main.mcfunction    # PVP 主逻辑：行为识别（持盾/疾跑逃离）+ 攻击节奏
+        pvp/ray.mcfunction     # 准星射线：0.25格步进、被方块阻挡、点碰撞检测
+        pvp/hit.mcfunction     # 命中结算：mob_attack 伤害归因僵尸，盾牌正面可挡
     tags/block/
       unbreakable.json         # 挖掘黑名单（基岩、黑曜石等）
       soft.json                # 软方块（挖得更快）
     predicate/
       aiming_player.json       # 检测持弓/弩的玩家
       sneaking.json            # 检测潜行中的玩家（嗅探降距用）
+      sprinting.json           # 检测疾跑中的玩家（追击判定用）
 ```
 
 ## 记分板约定（所有模块共用）
@@ -77,7 +87,8 @@ data/
 | `sz.posx` | 受阻检测用：该僵尸与目标的历史最近距离²（sz.posy/sz.posz 供临时假人使用） |
 | `sz.stuck` | 连续无进展的检测周期数 |
 | `sz.mine` | 挖掘进度倒计时（>0 表示正在挖） |
-| `sz.cool` | 通用冷却（放方块/跳劈/闪避共用或另分） |
+| `sz.cool` | 通用冷却（放方块/突进共用） |
+| `sz.atk` | PVP 攻击冷却（0.8 秒攻击节奏） |
 
 ## 实体标签约定
 
@@ -86,3 +97,4 @@ data/
 | `sz.init` | 已完成初始化的僵尸 |
 | `sz.alerted` | 已发现玩家、处于警报状态的僵尸 |
 | `sz.mining` | 正在挖掘中的僵尸 |
+| `sz.vip` | （玩家，瞬时）警报者的目标，用于向同伴传染仇恨 |

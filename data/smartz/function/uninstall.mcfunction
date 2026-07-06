@@ -14,7 +14,9 @@ scoreboard objectives remove sz.posz
 scoreboard objectives remove sz.stuck
 scoreboard objectives remove sz.mine
 scoreboard objectives remove sz.cool
+scoreboard objectives remove sz.atk
 tag @e remove sz.init
+tag @e remove sz.vip
 tag @e remove sz.alerted
 tag @e remove sz.mining
 kill @e[type=minecraft:marker,tag=sz.target]
