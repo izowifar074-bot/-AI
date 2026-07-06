@@ -10,6 +10,7 @@
 execute store success score #dmg sz.stuck run damage @a[dx=0,dy=0,dz=0,limit=1,gamemode=!creative,gamemode=!spectator] 7 minecraft:mob_attack by @s
 execute if score #dmg sz.stuck matches 1 run particle minecraft:sweep_attack ~ ~ ~ 0 0 0 0 1
 execute if score #dmg sz.stuck matches 1 run playsound minecraft:entity.player.attack.sweep hostile @a ~ ~ ~ 1 0.8
+execute if score #dmg sz.stuck matches 1 at @s run tp @s ~ ~ ~ facing entity @p[tag=sz.aim,gamemode=!spectator] eyes
 scoreboard players set @s sz.atk 1
 scoreboard players set @s sz.mine 0
 tag @s remove sz.mining
