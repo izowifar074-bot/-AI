@@ -1,5 +1,12 @@
 {
   "condition": "minecraft:entity_properties",
   "entity": "this",
-  "predicate": {}
+  "predicate": {
+    "type": "minecraft:player",
+    "equipment": {
+      "mainhand": {
+        "items": ["minecraft:bow", "minecraft:crossbow"]
+      }
+    }
+  }
 }
