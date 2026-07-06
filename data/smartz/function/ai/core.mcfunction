@@ -10,3 +10,6 @@
 execute if score @s sz.mine matches 1.. run function smartz:ai/dig/mine
 execute if score @s sz.mine matches 1.. run return 0
 execute if score @s sz.cool matches 1.. run scoreboard players remove @s sz.cool 1
+execute if score #dodge sz.config matches 1 run function smartz:ai/dodge
+execute if score #dodge sz.config matches 1 run function smartz:ai/leap
+function smartz:ai/hazard
