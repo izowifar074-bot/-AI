@@ -48,10 +48,18 @@ execute if score #delta sz.stuck matches ..0 run scoreboard players add @s sz.st
 # 被击退等导致基线失真：长期无进展就以当前距离重设基线
 execute if score @s sz.stuck matches 12.. run scoreboard players operation @s sz.posx = #dsq sz.stuck
 execute if score @s sz.stuck matches 12.. run scoreboard players set @s sz.stuck 3
-# 决策：垫高 → 搭路 → 挖掘。#built 标记本轮是否已放置方块，
-# 放了方块就不再触发挖掘，防止转头把自己刚放的方块啃掉
+# 决策。#built 标记本轮是否已放置方块，放了方块就不再触发挖掘，
+# 防止转头把自己刚放的方块啃掉。#hsq = 与目标的水平距离²。
+# 目标在上方>=2 → 垫高；同层 → 定向搭路；
+# 目标在下方>=2：水平未对齐 → 在自己这层搭路横向逼近，
+#                已到头顶(水平距离<=2) → 拆脚下方块天降打击；
+# 普通挖掘只在目标不低于自己 1 格以上时触发（dh >= -1）
 scoreboard players set #built sz.stuck 0
+scoreboard players operation #hsq sz.stuck = #dx sz.posx
+scoreboard players operation #hsq sz.stuck += #dz sz.posz
 execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
 execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches -1..1 if score #build sz.config matches 1 run function smartz:ai/build/bridge
-execute if score @s sz.stuck matches 3.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
+execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches 5.. if score #build sz.config matches 1 run function smartz:ai/build/bridge
+execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches ..-2 if score #hsq sz.stuck matches ..4 if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/down
+execute if score @s sz.stuck matches 3.. if score #dh sz.posy matches -1.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
 execute if score @s sz.stuck matches 3.. run scoreboard players set @s sz.stuck 1
