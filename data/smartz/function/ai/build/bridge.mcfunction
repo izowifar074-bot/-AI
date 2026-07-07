@@ -31,12 +31,14 @@ scoreboard players operation #adz sz.posz = #sdz sz.posz
 execute if score #adz sz.posz matches ..-1 run scoreboard players operation #adz sz.posz *= #cm1 sz.clock
 execute if score #adx sz.posx < #adz sz.posz run scoreboard players set #stepx sz.posx 0
 execute unless score #adx sz.posx < #adz sz.posz run scoreboard players set #stepz sz.posz 0
-# 四方向放置：支撑位有洞 + 脚部一格可通行 → 放置并记录成功
+# 四方向放置：支撑位有洞【且洞深 >=2 格】+ 脚部一格可通行 → 放置。
+# 深度条件很关键：1 格深的坎原版寻路自己能走下去，若不加此条件，
+# 追击起伏地形（下坡/浅沟）时会沿途乱铺方块
 scoreboard players set #bplaced sz.stuck 0
-execute align xyz if score #stepx sz.posx matches 1 if block ~1 ~-1 ~ #minecraft:replaceable if block ~1 ~ ~ #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~1 ~-1 ~ minecraft:cobblestone
-execute align xyz if score #stepx sz.posx matches -1 if block ~-1 ~-1 ~ #minecraft:replaceable if block ~-1 ~ ~ #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~-1 ~-1 ~ minecraft:cobblestone
-execute align xyz if score #stepz sz.posz matches 1 if block ~ ~-1 ~1 #minecraft:replaceable if block ~ ~ ~1 #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~ ~-1 ~1 minecraft:cobblestone
-execute align xyz if score #stepz sz.posz matches -1 if block ~ ~-1 ~-1 #minecraft:replaceable if block ~ ~ ~-1 #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~ ~-1 ~-1 minecraft:cobblestone
+execute align xyz if score #stepx sz.posx matches 1 if block ~1 ~-1 ~ #minecraft:replaceable if block ~1 ~-2 ~ #minecraft:replaceable if block ~1 ~ ~ #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~1 ~-1 ~ minecraft:cobblestone
+execute align xyz if score #stepx sz.posx matches -1 if block ~-1 ~-1 ~ #minecraft:replaceable if block ~-1 ~-2 ~ #minecraft:replaceable if block ~-1 ~ ~ #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~-1 ~-1 ~ minecraft:cobblestone
+execute align xyz if score #stepz sz.posz matches 1 if block ~ ~-1 ~1 #minecraft:replaceable if block ~ ~-2 ~1 #minecraft:replaceable if block ~ ~ ~1 #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~ ~-1 ~1 minecraft:cobblestone
+execute align xyz if score #stepz sz.posz matches -1 if block ~ ~-1 ~-1 #minecraft:replaceable if block ~ ~-2 ~-1 #minecraft:replaceable if block ~ ~ ~-1 #minecraft:replaceable store success score #bplaced sz.stuck run setblock ~ ~-1 ~-1 minecraft:cobblestone
 execute if score #bplaced sz.stuck matches 0 run tag @s remove sz.pave
 execute if score #bplaced sz.stuck matches 0 run return 0
 scoreboard players set #built sz.stuck 1

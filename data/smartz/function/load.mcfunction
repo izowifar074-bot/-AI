@@ -19,7 +19,6 @@ scoreboard objectives add sz.atk dummy
 scoreboard objectives add sz.hurt dummy
 scoreboard objectives add sz.pcd dummy
 scoreboard objectives add sz.prl dummy
-scoreboard objectives add sz.bcd dummy
 scoreboard objectives add sz.hp dummy
 scoreboard players set #tick sz.clock 0
 scoreboard players set #next_id sz.id 0

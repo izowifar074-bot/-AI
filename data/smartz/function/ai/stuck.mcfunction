@@ -55,6 +55,14 @@ execute if score #dsq sz.stuck matches ..8 run function smartz:ai/climb_off
 execute if score #dsq sz.stuck matches ..8 run tag @s remove sz.pave
 execute if score #dsq sz.stuck matches ..8 run scoreboard players set @s sz.stuck 0
 execute if score #dsq sz.stuck matches ..8 run return 0
+# 远离检测（@s sz.posy 存上一样本距离²）：距离明显拉大 = 目标在
+# 逃、寻路本身工作正常，只是速度差——不算受阻。没有这条，追击
+# 快速玩家时计数照涨，起伏地形上会沿途乱搭方块。
+scoreboard players operation #away sz.stuck = #dsq sz.stuck
+scoreboard players operation #away sz.stuck -= @s sz.posy
+scoreboard players operation @s sz.posy = #dsq sz.stuck
+execute if score #away sz.stuck matches 3.. run scoreboard players set @s sz.stuck 0
+execute if score #away sz.stuck matches 3.. run return 0
 # 与历史最近距离比较：变近 = 有进展
 scoreboard players operation #delta sz.stuck = @s sz.posx
 scoreboard players operation #delta sz.stuck -= #dsq sz.stuck
@@ -71,8 +79,11 @@ execute if score #build sz.config matches 0 run function smartz:ai/climb_off
 # #built 标记本轮是否已放置方块，放了就不再触发挖掘，
 # 防止转头啃掉自己刚放的方块。触发阈值 2（约0.8秒反应）。
 scoreboard players set #built sz.stuck 0
+# 攀爬无效检测：冻结走动却 2.4 秒仍无进展（头顶被封等）→ 解除
+# 冻结还权原版寻路，防止"空中雕像"；计数 >=6 期间禁止重新入冻
+execute if entity @s[tag=sz.climb] if score @s sz.stuck matches 6.. run function smartz:ai/climb_off
 # 目标在上方>=2 且受阻 → 进入攀爬模式
-execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/climb_on
+execute if score @s sz.stuck matches 2..5 if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/climb_on
 # 攀爬模式：持续垫高（也由 core 每 4gt 驱动，见 core.mcfunction）
 execute if entity @s[tag=sz.climb] if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
 # 搭路惯性（tag sz.pave，bridge 成功时自打/失败时自摘）：
@@ -88,8 +99,8 @@ execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches ..-2 if sc
 # 普通挖掘（目标不低于自己 1 格以上时）
 execute if score @s sz.stuck matches 2.. if score #dh sz.posy matches -1.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
 # ---------- 顽固卡死升级（约3秒仍无进展）：放宽路由全试 ----------
-# 垫高仍要求目标在上方（dh>=1）——目标不在上方时垫高毫无意义，
+# 垫高仍要求目标在上方 >=2——目标不在上方时垫高毫无意义，
 # 只会在平地凭空起塔
-execute if score @s sz.stuck matches 8.. if score #dh sz.posy matches 1.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
+execute if score @s sz.stuck matches 8.. if score #dh sz.posy matches 2.. if score #build sz.config matches 1 run function smartz:ai/build/pillar
 execute if score @s sz.stuck matches 8.. if score #build sz.config matches 1 run function smartz:ai/build/bridge
 execute if score @s sz.stuck matches 8.. if score #built sz.stuck matches 0 if score #dig sz.config matches 1 run function smartz:ai/dig/decide
