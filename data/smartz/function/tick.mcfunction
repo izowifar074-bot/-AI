@@ -4,9 +4,12 @@
 #   1. #tick sz.clock += 1
 #   2. 若总开关 #master sz.config = 0 则直接 return
 #   3. 对未初始化僵尸执行 init（每刻都查，选择器带 tag=!sz.init 限制）
-#   4. 每 4gt：对玩家 48 格内的已初始化僵尸执行 ai/core
-#   5. 每 8gt：执行 ai/stuck（卡住检测）
-#   6. 每 20gt：执行 ai/sense（穿墙嗅探索敌）、ai/swarm/alert（警报广播）
+#   4. 每 1gt：对 8 格内有存活模式玩家的僵尸执行 ai/pvp/attack
+#      （控距步法 + 出手判定，引擎上限攻速）
+#   5. 每 4gt：对玩家 48 格内的已初始化僵尸执行 ai/core
+#   6. 每 8gt：执行 ai/stuck（受阻检测与地形决策）
+#   7. 每 20gt：执行 ai/sense（穿墙嗅探索敌）、ai/swarm/alert（警报
+#      广播）、孤儿挖掘锚点清理
 #   分频用 scoreboard players operation 取模实现
 # ============================================================
 scoreboard players add #tick sz.clock 1

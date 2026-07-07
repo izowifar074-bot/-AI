@@ -78,7 +78,6 @@ data/
         build/bridge.mcfunction# 定向搭路：按目标方向网格步进铺路，可填壕沟
         build/catch.mcfunction # 坠落拦截：目标在上方时下坠自动垫砖，高度只增不减
         dodge.mcfunction       # 蛇皮走位闪避
-        leap.mcfunction        # 近身跳劈
         hazard.mcfunction      # 危险方块规避
         swarm/alert.mcfunction # 发现玩家 → 咆哮 + 标记目标玩家并广播
         swarm/respond.mcfunction # 响应警报：加速围攻 + 目标传染（共享情报，不刷怪）
@@ -105,10 +104,12 @@ data/
 | `sz.clock` | 全局时钟（假人 `#tick` 持有当前刻数） |
 | `sz.id` | 僵尸唯一编号（自增，用于分摊与走位方向） |
 | `sz.config` | 配置项（假人 `#master` `#dig` `#build` `#swarm` `#dodge`，1=开 0=关） |
-| `sz.posx` | 受阻检测用：该僵尸与目标的历史最近距离²（sz.posy/sz.posz 供临时假人使用） |
+| `sz.posx` | 受阻检测：该僵尸与目标的历史最近距离² |
+| `sz.posy` | 受阻检测：上一采样的距离²（远离豁免用；也供临时假人） |
+| `sz.posz` | 仅供临时假人使用 |
 | `sz.stuck` | 连续无进展的检测周期数 |
 | `sz.mine` | 挖掘进度倒计时（>0 表示正在挖） |
-| `sz.cool` | 通用冷却（放方块/突进共用） |
+| `sz.cool` | 地形动作通用冷却（垫高/搭路/跳崖共用） |
 | `sz.atk` | PVP 攻击冷却（刻级，出手层每刻递减） |
 | `sz.hurt` | 受击连招窗口计数（≥20 触发举盾；负值 = 举盾冷却） |
 | `sz.pcd` | 末影珍珠冷却（600 × 4gt = 2 分钟） |
