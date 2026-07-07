@@ -1,29 +1,24 @@
 # ============================================================
 # smartz:tick — 每游戏刻执行（由 minecraft:tick 触发）
-# 职责（性能核心，分频调度）：
-#   1. #tick sz.clock += 1
-#   2. 若总开关 #master sz.config = 0 则直接 return
-#   3. 对未初始化僵尸执行 init（每刻都查，选择器带 tag=!sz.init 限制）
-#   4. 每 1gt：对 8 格内有存活模式玩家的僵尸执行 ai/pvp/attack
-#      （控距步法 + 出手判定，引擎上限攻速）
-#   5. 每 4gt：对玩家 48 格内的已初始化僵尸执行 ai/core
-#   6. 每 8gt：执行 ai/stuck（受阻检测与地形决策）
-#   7. 每 20gt：执行 ai/sense（穿墙嗅探索敌）、ai/swarm/alert（警报
-#      广播）、孤儿挖掘锚点清理
-#   分频用 scoreboard players operation 取模实现
+# 分频调度（取模实现）：
+#   1gt   pvp/attack（控距步法+出手，8 格内有存活模式玩家才派发）
+#   4gt   ai/core（各僵尸主循环）
+#   8gt   ai/stuck（受阻检测与地形决策）
+#   20gt  ai/sense（穿墙嗅探）、swarm/alert（警报）、孤儿锚点清理
+# 所有僵尸选择器均带 48 格玩家距离限制。
 # ============================================================
-scoreboard players add #tick sz.clock 1
-execute if score #master sz.config matches 0 run return 0
+scoreboard players add #tick sz.ai 1
+execute if score #master sz.ai matches 0 run return 0
 execute as @e[type=minecraft:zombie,tag=!sz.init] at @s run function smartz:init
-execute if score #pvp sz.config matches 1 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..8,gamemode=!creative,gamemode=!spectator] run function smartz:ai/pvp/attack
-scoreboard players operation #mod4 sz.clock = #tick sz.clock
-scoreboard players operation #mod4 sz.clock %= #c4 sz.clock
-execute if score #mod4 sz.clock matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/core
-scoreboard players operation #mod8 sz.clock = #tick sz.clock
-scoreboard players operation #mod8 sz.clock %= #c8 sz.clock
-execute if score #mod8 sz.clock matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/stuck
-scoreboard players operation #mod20 sz.clock = #tick sz.clock
-scoreboard players operation #mod20 sz.clock %= #c20 sz.clock
-execute if score #mod20 sz.clock matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/sense
-execute if score #mod20 sz.clock matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/swarm/alert
-execute if score #mod20 sz.clock matches 0 as @e[type=minecraft:marker,tag=sz.target] at @s unless entity @e[type=minecraft:zombie,tag=sz.mining,distance=..8] run kill @s
+execute if score #pvp sz.ai matches 1 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..8,gamemode=!creative,gamemode=!spectator] run function smartz:ai/pvp/attack
+scoreboard players operation #mod4 sz.ai = #tick sz.ai
+scoreboard players operation #mod4 sz.ai %= #c4 sz.ai
+execute if score #mod4 sz.ai matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/core
+scoreboard players operation #mod8 sz.ai = #tick sz.ai
+scoreboard players operation #mod8 sz.ai %= #c8 sz.ai
+execute if score #mod8 sz.ai matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/stuck
+scoreboard players operation #mod20 sz.ai = #tick sz.ai
+scoreboard players operation #mod20 sz.ai %= #c20 sz.ai
+execute if score #mod20 sz.ai matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/sense
+execute if score #mod20 sz.ai matches 0 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..48] run function smartz:ai/swarm/alert
+execute if score #mod20 sz.ai matches 0 as @e[type=minecraft:marker,tag=sz.target] at @s unless entity @e[type=minecraft:zombie,tag=sz.mining,distance=..8] run kill @s

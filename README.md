@@ -12,17 +12,20 @@ PVP 近战系统——攻击只在僵尸准星真正对准你时命中（射线�
 2. 游戏内执行 `/reload`
 3. 看到聊天栏出现加载成功提示即生效
 
-## 游戏内开关
+## 游戏内开关（翻转式：执行一次开↔关切换）
 
 | 命令 | 作用 |
 |---|---|
-| `/function smartz:config/master_on` / `master_off` | 总开关 |
-| `/function smartz:config/dig_on` / `dig_off` | 挖掘方块 |
-| `/function smartz:config/build_on` / `build_off` | 放置方块（搭桥/垫高） |
-| `/function smartz:config/swarm_on` / `swarm_off` | 群体协作 |
-| `/function smartz:config/dodge_on` / `dodge_off` | 闪避与走位 |
-| `/function smartz:config/pvp_on` / `pvp_off` | PVP 近战系统 |
-| `/function smartz:uninstall` | 完全卸载（清除记分板与标签） |
+| `/function smartz:toggle/master` | 总开关 |
+| `/function smartz:toggle/dig` | 挖掘方块 |
+| `/function smartz:toggle/build` | 放置方块（搭路/垫高/跳崖） |
+| `/function smartz:toggle/swarm` | 群体协作 |
+| `/function smartz:toggle/dodge` | 闪避走位 |
+| `/function smartz:toggle/pvp` | PVP 近战系统 |
+| `/function smartz:uninstall` | 完全卸载（清除记分板/标签/修饰符/锚点） |
+
+> 从旧版本升级：先用旧数据包执行一次 `/function smartz:uninstall`
+> 清掉旧记分板，再覆盖文件 `/reload`。
 
 ## 测试清单
 
@@ -57,37 +60,33 @@ data/
   minecraft/tags/function/     # load/tick 挂接点（已完成，勿改）
   smartz/
     function/
-      load.mcfunction          # 初始化记分板与默认配置
-      tick.mcfunction          # 全局时钟 + 分频调度器（性能核心）
-      init.mcfunction          # 新僵尸初始化：属性强化、开门、分配 id
-      uninstall.mcfunction     # 卸载清理
-      config/                  # 功能开关（每个开关一个文件）
+      load.mcfunction          # 建 10 个记分板、常量、默认配置
+      tick.mcfunction          # 分频调度器：1gt 出手 / 4gt 主循环 / 8gt 受阻 / 20gt 嗅探警报
+      init.mcfunction          # 新僵尸初始化：属性/装备/编号/基线
+      uninstall.mcfunction     # 完全卸载
+      toggle/                  # 6 个翻转式开关（master/dig/build/swarm/dodge/pvp）
       ai/
-        core.mcfunction        # 每只僵尸的主循环（每 4gt 一次）
-        sense.mcfunction       # 穿墙嗅探：微量伤害归因制造仇恨，32格索敌（潜行12格）
-        stuck.mcfunction       # 追击受阻检测与分层决策（>=3 常规 / >=8 全试 / >=12 重置基线）
-        climb_on.mcfunction    # 进入攀爬模式：冻结原版走动（-100%移速修饰符）
-        climb_off.mcfunction   # 退出攀爬模式：到达高度/失去目标/建造关闭时解冻
-        descend.mcfunction     # 跳崖下追：目标在下方时四邻找开放落沿直接跳
-        drop_probe.mcfunction  # 落点扫描：危险否决/水面地面通过/深度预算封顶
-        dig/decide.mcfunction  # 挖掘决策：选定要挖的方块
-        dig/start.mcfunction   # 挖掘启动：marker 配对与时长设定（decide/down 共用）
-        dig/down.mcfunction    # 天降打击：到玩家头顶后拆脚下方块坠落突袭
-        dig/mine.mcfunction    # 分段挖掘执行（进度、粒子、音效、破坏）
-        build/pillar.mcfunction# 垫方块爬高（tp 居中防滑落）
-        build/bridge.mcfunction# 定向搭路：按目标方向网格步进铺路，可填壕沟
-        build/catch.mcfunction # 坠落拦截：目标在上方时下坠自动垫砖，高度只增不减
-        dodge.mcfunction       # 蛇皮走位闪避
-        hazard.mcfunction      # 危险方块规避
-        swarm/alert.mcfunction # 发现玩家 → 咆哮 + 标记目标玩家并广播
-        swarm/respond.mcfunction # 响应警报：加速围攻 + 目标传染（共享情报，不刷怪）
-        pvp/main.mcfunction    # PVP 行为层(4gt)：举盾/换手/疾跑追击/珍珠决策
-        pvp/attack.mcfunction  # PVP 出手层(1gt)：控距步法+瞄准射线，引擎上限攻速
-        pvp/ray.mcfunction     # 准星射线：0.25格步进、被方块阻挡、点碰撞检测
-        pvp/hit.mcfunction     # 命中结算：mob_attack 伤害归因僵尸，盾牌正面可挡
-        pvp/guard.mcfunction   # 被控举盾：短窗两次受击→盾格音效+抗性IV+停手1秒
-        pvp/pearl_throw.mcfunction # 掷珍珠起手（16~48格，2分钟一次）
-        pvp/pearl_jump.mcfunction  # 珍珠落点闪现（目标面前2.5格+5点摔落伤害）
+        core.mcfunction        # 主循环(4gt)：调度子模块 + 内联危险规避
+        sense.mcfunction       # 穿墙嗅探：32格索敌（潜行12格）
+        stuck.mcfunction       # 受阻检测与全部地形决策（含攀爬模式进入）
+        climb_off.mcfunction   # 退出攀爬模式（多处调用，保留为函数）
+        descend.mcfunction     # 跳崖下追：四邻找开放落沿直接跳
+        drop_probe.mcfunction  # 落点扫描（递归）
+        dodge.mcfunction       # 对弓走位（近战让位给控距步法）
+        dig/decide.mcfunction  # 挖掘决策：眼向射线选块
+        dig/start.mcfunction   # 挖掘启动：marker 配对（decide/down 共用）
+        dig/down.mcfunction    # 天降打击（descend 全部否决时的兜底）
+        dig/mine.mcfunction    # 分段挖掘执行
+        build/pillar.mcfunction# 垫方块爬高
+        build/bridge.mcfunction# 定向搭路（洞深>=2 才铺 + 踏步跟进）
+        build/catch.mcfunction # 坠落拦截（贴结构+目标高>=2 才垫）
+        swarm/alert.mcfunction # 警报：咆哮 + 目标传染广播
+        swarm/respond.mcfunction # 响应：提速 + 建立穿墙仇恨
+        pvp/main.mcfunction    # 行为层(4gt)：举盾/换手/追击/珍珠（guard与掷珍珠已内联）
+        pvp/attack.mcfunction  # 出手层(1gt)：控距步法 + 瞄准射线
+        pvp/ray.mcfunction     # 准星射线（递归）
+        pvp/hit.mcfunction     # 命中结算
+        pvp/pearl_jump.mcfunction # 珍珠落点闪现
     tags/block/
       unbreakable.json         # 挖掘黑名单（基岩、黑曜石等）
       soft.json                # 软方块（挖得更快）
@@ -97,24 +96,24 @@ data/
       sprinting.json           # 检测疾跑中的玩家（追击判定用）
 ```
 
-## 记分板约定（所有模块共用）
+## 状态模型（10 个记分板）
 
-| 记分板 | 用途 |
-|---|---|
-| `sz.clock` | 全局时钟（假人 `#tick` 持有当前刻数） |
-| `sz.id` | 僵尸唯一编号（自增，用于分摊与走位方向） |
-| `sz.config` | 配置项（假人 `#master` `#dig` `#build` `#swarm` `#dodge`，1=开 0=关） |
-| `sz.posx` | 受阻检测：该僵尸与目标的历史最近距离² |
-| `sz.posy` | 受阻检测：上一采样的距离²（远离豁免用；也供临时假人） |
-| `sz.posz` | 仅供临时假人使用 |
-| `sz.stuck` | 连续无进展的检测周期数 |
-| `sz.mine` | 挖掘进度倒计时（>0 表示正在挖） |
-| `sz.cool` | 地形动作通用冷却（垫高/搭路/跳崖共用） |
-| `sz.atk` | PVP 攻击冷却（刻级，出手层每刻递减） |
-| `sz.hurt` | 受击连招窗口计数（≥20 触发举盾；负值 = 举盾冷却） |
-| `sz.pcd` | 末影珍珠冷却（600 × 4gt = 2 分钟） |
-| `sz.prl` | 珍珠飞行倒计时（1 时执行落点闪现） |
-| `sz.hp` | 上次采样的血量 ×10（真实受击检测用，微量归因伤不触发举盾） |
+设计原则：记分板数量 = 每只僵尸需要的独立状态数。全局变量、常量、
+配置项都是 `#` 假人分数，全部寄宿在 `sz.ai` 上，不占额外记分板；
+珍珠的"起手"与"冷却"永不同时存在，用一个分数的正负半轴合并。
+
+| 记分板 | 每僵尸状态 | 兼载的假人 |
+|---|---|---|
+| `sz.ai` | 受阻计数（分层：≥2 决策 / ≥8 升级 / ≥12 重置基线） | 全部：`#tick` 时钟、`#c*` 常量、`#master/#dig/#build/#swarm/#dodge/#pvp` 配置、各临时变量 |
+| `sz.id` | 唯一编号（挖掘 marker 配对、走位相位） | — |
+| `sz.mine` | 挖掘进度倒计时 | — |
+| `sz.cool` | 地形动作冷却（垫高/搭路/跳崖） | — |
+| `sz.atk` | 出手冷却（刻级） | — |
+| `sz.hurt` | 受击连招计数（≥20 举盾；负值=举盾冷却） | — |
+| `sz.hp` | 上次采样血量 ×10（真实受击检测） | — |
+| `sz.pearl` | 珍珠状态（正=起手倒计时 / 负=冷却恢复 / 0=就绪） | — |
+| `sz.dmin` | 与目标的历史最近距离²（进展基线） | — |
+| `sz.dprev` | 上一采样距离²（远离豁免） | — |
 
 ## 实体标签约定
 
