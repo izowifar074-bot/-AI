@@ -19,7 +19,7 @@ scoreboard objectives add sz.pearl dummy
 scoreboard objectives add sz.dmin dummy
 scoreboard objectives add sz.dprev dummy
 scoreboard players set #tick sz.ai 0
-scoreboard players set #next_id sz.ai 0
+execute unless score #next_id sz.ai = #next_id sz.ai run scoreboard players set #next_id sz.ai 0
 scoreboard players set #c2 sz.ai 2
 scoreboard players set #c4 sz.ai 4
 scoreboard players set #c8 sz.ai 8

@@ -6,10 +6,12 @@
 #   8gt   ai/stuck（受阻检测与地形决策）
 #   20gt  ai/sense（穿墙嗅探）、swarm/alert（警报）、孤儿锚点清理
 # 所有僵尸选择器均带 48 格玩家距离限制。
+# 初始化判定用"sz.dmin 未设置"而非标签：带旧版标签但缺新记分板
+# 状态的僵尸（升级场景）也会被重新初始化，否则其 AI 残废。
 # ============================================================
 scoreboard players add #tick sz.ai 1
 execute if score #master sz.ai matches 0 run return 0
-execute as @e[type=minecraft:zombie,tag=!sz.init] at @s run function smartz:init
+execute as @e[type=minecraft:zombie] at @s unless score @s sz.dmin = @s sz.dmin run function smartz:init
 execute if score #pvp sz.ai matches 1 as @e[type=minecraft:zombie,tag=sz.init] at @s if entity @a[distance=..8,gamemode=!creative,gamemode=!spectator] run function smartz:ai/pvp/attack
 scoreboard players operation #mod4 sz.ai = #tick sz.ai
 scoreboard players operation #mod4 sz.ai %= #c4 sz.ai
