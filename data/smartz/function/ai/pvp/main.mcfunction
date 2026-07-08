@@ -1,5 +1,5 @@
 # ============================================================
-# smartz:ai/pvp/main — PVP 行为层（executor = 僵尸，每 4gt 由 core 调用）
+# smartz:ai/pvp/main — PVP 行为层（executor = 尸壳，每 4gt 由 core 调用）
 # 出手与控距步法在 pvp/attack（tick 每刻驱动）。本函数：
 #   1. 珍珠状态机推进（sz.pearl：正=起手倒计时/负=冷却恢复/0=就绪）
 #   2. 被控举盾：血量下降>=1.0 才算真受击（HurtTime 会被嗅探的

@@ -1,5 +1,5 @@
 # ============================================================
-# smartz:ai/pvp/attack — 出手层+控距步法（executor = 僵尸，tick 每刻驱动）
+# smartz:ai/pvp/attack — 出手层+控距步法（executor = 尸壳，tick 每刻驱动）
 # 控距步法（目标 4.5 格内，每刻 <=0.22 格微 tp，观感为走位）：
 #   <2 后撤步 0.11/刻(=玩家后退) / 2~3.4 环绕步 0.12 / >3.4 进步 0.20
 #   约束：自己踩地+落点有支撑+两格可通行——不悬空滑行；每步带
@@ -23,23 +23,23 @@ execute if score #fw sz.ai matches 1 on target if entity @s[distance=..2] run sc
 scoreboard players operation #par sz.ai = #tick sz.ai
 scoreboard players operation #par sz.ai += @s sz.id
 scoreboard players operation #par sz.ai %= #c20 sz.ai
-execute if score #fw sz.ai matches 2 at @s rotated ~ 0 positioned ^ ^ ^-0.11 unless block ~ ~-1 ~ #minecraft:replaceable if block ~ ~ ~ #minecraft:replaceable if block ~ ~1 ~ #minecraft:replaceable run tp @s ~ ~ ~ facing entity @p[tag=sz.aim,gamemode=!spectator] eyes
-execute if score #fw sz.ai matches 3 if score #par sz.ai matches 0..9 at @s rotated ~ 0 positioned ^0.12 ^ ^ unless block ~ ~-1 ~ #minecraft:replaceable if block ~ ~ ~ #minecraft:replaceable if block ~ ~1 ~ #minecraft:replaceable run tp @s ~ ~ ~ facing entity @p[tag=sz.aim,gamemode=!spectator] eyes
-execute if score #fw sz.ai matches 3 if score #par sz.ai matches 10..19 at @s rotated ~ 0 positioned ^-0.12 ^ ^ unless block ~ ~-1 ~ #minecraft:replaceable if block ~ ~ ~ #minecraft:replaceable if block ~ ~1 ~ #minecraft:replaceable run tp @s ~ ~ ~ facing entity @p[tag=sz.aim,gamemode=!spectator] eyes
-execute if score #fw sz.ai matches 4 at @s rotated ~ 0 positioned ^ ^ ^0.2 unless block ~ ~-1 ~ #minecraft:replaceable if block ~ ~ ~ #minecraft:replaceable if block ~ ~1 ~ #minecraft:replaceable run tp @s ~ ~ ~ facing entity @p[tag=sz.aim,gamemode=!spectator] eyes
+execute if score #fw sz.ai matches 2 at @s rotated ~ 0 positioned ^ ^ ^-0.11 unless block ~ ~-1 ~ #minecraft:replaceable if block ~ ~ ~ #minecraft:replaceable if block ~ ~1 ~ #minecraft:replaceable run tp @s ~ ~ ~ facing entity @e[tag=sz.aim,limit=1] eyes
+execute if score #fw sz.ai matches 3 if score #par sz.ai matches 0..9 at @s rotated ~ 0 positioned ^0.12 ^ ^ unless block ~ ~-1 ~ #minecraft:replaceable if block ~ ~ ~ #minecraft:replaceable if block ~ ~1 ~ #minecraft:replaceable run tp @s ~ ~ ~ facing entity @e[tag=sz.aim,limit=1] eyes
+execute if score #fw sz.ai matches 3 if score #par sz.ai matches 10..19 at @s rotated ~ 0 positioned ^-0.12 ^ ^ unless block ~ ~-1 ~ #minecraft:replaceable if block ~ ~ ~ #minecraft:replaceable if block ~ ~1 ~ #minecraft:replaceable run tp @s ~ ~ ~ facing entity @e[tag=sz.aim,limit=1] eyes
+execute if score #fw sz.ai matches 4 at @s rotated ~ 0 positioned ^ ^ ^0.2 unless block ~ ~-1 ~ #minecraft:replaceable if block ~ ~ ~ #minecraft:replaceable if block ~ ~1 ~ #minecraft:replaceable run tp @s ~ ~ ~ facing entity @e[tag=sz.aim,limit=1] eyes
 # ---- 出手 ----
-execute if score @s sz.atk matches 1.. run tag @a remove sz.aim
+execute if score @s sz.atk matches 1.. run tag @e remove sz.aim
 execute if score @s sz.atk matches 1.. run return 0
 scoreboard players set #go sz.ai 0
 execute on target if entity @s[distance=..3.4] run scoreboard players set #go sz.ai 1
-execute if score #go sz.ai matches 0 run tag @a remove sz.aim
+execute if score #go sz.ai matches 0 run tag @e remove sz.aim
 execute if score #go sz.ai matches 0 run return 0
 scoreboard players set #front sz.ai 0
-execute positioned ^ ^ ^3 if entity @p[tag=sz.aim,distance=..3.2,gamemode=!spectator] run scoreboard players set #front sz.ai 1
-execute if score #front sz.ai matches 0 at @s run tp @s ~ ~ ~ facing entity @p[tag=sz.aim,gamemode=!spectator] eyes
+execute positioned ^ ^ ^3 if entity @e[tag=sz.aim,distance=..3.2,limit=1] run scoreboard players set #front sz.ai 1
+execute if score #front sz.ai matches 0 at @s run tp @s ~ ~ ~ facing entity @e[tag=sz.aim,limit=1] eyes
 execute if score #front sz.ai matches 0 run scoreboard players set @s sz.atk 2
-execute if score #front sz.ai matches 0 run tag @a remove sz.aim
+execute if score #front sz.ai matches 0 run tag @e remove sz.aim
 execute if score #front sz.ai matches 0 run return 0
 scoreboard players set #ray sz.ai 12
-execute at @s anchored eyes facing entity @p[tag=sz.aim,gamemode=!spectator] eyes positioned ^ ^ ^0.25 anchored feet run function smartz:ai/pvp/ray
-tag @a remove sz.aim
+execute at @s anchored eyes facing entity @e[tag=sz.aim,limit=1] eyes positioned ^ ^ ^0.25 anchored feet run function smartz:ai/pvp/ray
+tag @e remove sz.aim

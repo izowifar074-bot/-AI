@@ -12,7 +12,7 @@ scoreboard objectives remove sz.hp
 scoreboard objectives remove sz.pearl
 scoreboard objectives remove sz.dmin
 scoreboard objectives remove sz.dprev
-execute as @e[type=minecraft:zombie,tag=sz.climb] run attribute @s minecraft:movement_speed modifier remove smartz:freeze
+execute as @e[type=minecraft:husk,tag=sz.climb] run attribute @s minecraft:movement_speed modifier remove smartz:freeze
 tag @e remove sz.init
 tag @e remove sz.alerted
 tag @e remove sz.mining
@@ -21,5 +21,7 @@ tag @e remove sz.pave
 tag @e remove sz.aim
 tag @e remove sz.vip
 tag @e remove sz.tpme
+tag @e remove sz.tgtable
+tag @e remove sz.cand
 kill @e[type=minecraft:marker,tag=sz.target]
-tellraw @a {"text":"[智能僵尸] 卸载完成","color":"red"}
+tellraw @a {"text":"[智能尸壳] 卸载完成","color":"red"}

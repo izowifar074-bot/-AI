@@ -1,8 +1,8 @@
 # ============================================================
 # smartz:load — 数据包加载时执行一次（由 minecraft:load 触发）
 # 状态模型（共 10 个记分板，详见 README"状态模型"）：
-#   sz.ai    僵尸受阻计数(@s) + 全部全局变量/常量/配置(#假人)
-#   sz.id    僵尸唯一编号（挖掘 marker 配对同用）
+#   sz.ai    尸壳受阻计数(@s) + 全部全局变量/常量/配置(#假人)
+#   sz.id    尸壳唯一编号（挖掘 marker 配对同用）
 #   sz.mine  挖掘进度倒计时        sz.cool  地形动作冷却
 #   sz.atk   出手冷却（刻级）      sz.hurt  受击连招计数/格挡冷却(±)
 #   sz.hp    上次采样血量×10       sz.pearl 珍珠(+起手/-冷却/0就绪)
@@ -32,4 +32,4 @@ execute unless score #build sz.ai = #build sz.ai run scoreboard players set #bui
 execute unless score #swarm sz.ai = #swarm sz.ai run scoreboard players set #swarm sz.ai 1
 execute unless score #dodge sz.ai = #dodge sz.ai run scoreboard players set #dodge sz.ai 1
 execute unless score #pvp sz.ai = #pvp sz.ai run scoreboard players set #pvp sz.ai 1
-tellraw @a {"text":"[智能僵尸] 已加载。开关：/function smartz:toggle/<master|dig|build|swarm|dodge|pvp>","color":"green"}
+tellraw @a {"text":"[智能尸壳] 已加载。开关 /function smartz:toggle/<master|dig|build|swarm|dodge|pvp>；用 /tag <实体> add sz.enemy 可让尸壳仇恨该实体","color":"green"}

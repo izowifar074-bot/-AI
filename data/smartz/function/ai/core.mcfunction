@@ -1,5 +1,5 @@
 # ============================================================
-# smartz:ai/core — 每只僵尸主循环（executor = 僵尸，每 4gt 一次）
+# smartz:ai/core — 每只尸壳主循环（executor = 尸壳，每 4gt 一次）
 #   0. #pvp → pvp/main（行为层；出手与步法在 pvp/attack，tick 每刻驱动）
 #   0b. #build → build/catch（坠落拦截，攀爬不掉高度）
 #   1. 挖掘中 → dig/mine 后 return
