@@ -91,6 +91,9 @@ data/
         climb_off.mcfunction   # 退出攀爬模式（多处调用，保留为函数）
         descend.mcfunction     # 跳崖下追：四邻找开放落沿直接跳
         drop_probe.mcfunction  # 落点扫描（递归）
+        rescue.mcfunction      # 虚空自救：方形气球外扩找最近墙，铺路逃生
+        rescue_ray.mcfunction  # 气球单向外扩射线（递归）
+        rescue_lay.mcfunction  # 沿命中方向铺逃生路（递归）
         dodge.mcfunction       # 对弓走位（近战让位给控距步法）
         dig/decide.mcfunction  # 挖掘决策：眼向射线选块
         dig/start.mcfunction   # 挖掘启动：marker 配对（decide/down 共用）

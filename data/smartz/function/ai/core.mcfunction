@@ -1,7 +1,7 @@
 # ============================================================
 # smartz:ai/core — 每只尸壳主循环（executor = 尸壳，每 4gt 一次）
 #   0. #pvp → pvp/main（行为层；出手与步法在 pvp/attack，tick 每刻驱动）
-#   0b. #build → build/catch（坠落拦截，攀爬不掉高度）
+#   0b. #build → build/catch（贴结构攀爬拦截）+ ai/rescue（虚空自救）
 #   1. 挖掘中 → dig/mine 后 return
 #   2. sz.cool 递减；攀爬模式每 4gt 驱动一次垫高（cool=1 限速）
 #   3. #dodge → dodge（对弓走位；近战让位给控距步法）
@@ -9,6 +9,7 @@
 # ============================================================
 execute if score #pvp sz.ai matches 1 run function smartz:ai/pvp/main
 execute if score #build sz.ai matches 1 run function smartz:ai/build/catch
+execute if score #build sz.ai matches 1 run function smartz:ai/rescue
 execute if score @s sz.mine matches 1.. run function smartz:ai/dig/mine
 execute if score @s sz.mine matches 1.. run return 0
 execute if score @s sz.cool matches 1.. run scoreboard players remove @s sz.cool 1
