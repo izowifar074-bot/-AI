@@ -3,8 +3,8 @@
 # 网格步进：按"尸壳→目标"坐标差取主轴（|dx|>=|dz| 走 x 否则走 z），
 # 逐格朝玩家铺路。放置条件：支撑位有洞【且洞深>=2】+ 脚部可通行
 # （1 格坎原版自己能走，深度条件防止起伏地形沿途乱铺）。
-# 踏步跟进：放置成功且落点两格无阻挡 → tp 到新方块中心，
-# "放一块走一步"，原版寻路无机会把尸壳带歪。
+# 踏步跟进：放置成功后先补一块自己脚下（防自身移动与 tp 步进
+# 错位漏格，修"搭路断一格"），再 tp 到新方块中心，"放一块走一步"。
 # #bplaced 为本函数私有成功标记；成功同步置 #built 与 tag sz.pave。
 # 依赖 stuck 算好的 #tx/#zx/#tz/#zz。
 # ============================================================
@@ -34,6 +34,7 @@ execute if score #bplaced sz.ai matches 0 run tag @s remove sz.pave
 execute if score #bplaced sz.ai matches 0 run return 0
 scoreboard players set #built sz.ai 1
 tag @s add sz.pave
+execute align xyz if block ~ ~-1 ~ #minecraft:replaceable run setblock ~ ~-1 ~ minecraft:cobblestone
 execute if score #stepx sz.ai matches 1 align xyz if block ~1 ~ ~ #minecraft:replaceable if block ~1 ~1 ~ #minecraft:replaceable run tp @s ~1.5 ~ ~0.5
 execute if score #stepx sz.ai matches -1 align xyz if block ~-1 ~ ~ #minecraft:replaceable if block ~-1 ~1 ~ #minecraft:replaceable run tp @s ~-0.5 ~ ~0.5
 execute if score #stepz sz.ai matches 1 align xyz if block ~ ~ ~1 #minecraft:replaceable if block ~ ~1 ~1 #minecraft:replaceable run tp @s ~0.5 ~ ~1.5
