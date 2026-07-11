@@ -24,4 +24,5 @@ tag @e remove sz.tpme
 tag @e remove sz.tgtable
 tag @e remove sz.cand
 kill @e[type=minecraft:marker,tag=sz.target]
+kill @e[type=minecraft:husk,tag=sz.test]
 tellraw @a {"text":"[智能尸壳] 卸载完成","color":"red"}

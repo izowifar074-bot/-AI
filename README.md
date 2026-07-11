@@ -39,6 +39,7 @@ PVP 近战系统——攻击只在尸壳准星真正对准目标时命中（射�
 | `/function smartz:toggle/swarm` | 群体协作 |
 | `/function smartz:toggle/dodge` | 闪避走位 |
 | `/function smartz:toggle/pvp` | PVP 近战系统 |
+| `/function smartz:test_pvp` | 【测试】上空生成两只互敌尸壳观战 PVP（`/kill @e[tag=sz.test]` 清场） |
 | `/function smartz:uninstall` | 完全卸载（清除记分板/标签/修饰符/锚点） |
 
 > 从旧版本升级：先用旧数据包执行一次 `/function smartz:uninstall`
