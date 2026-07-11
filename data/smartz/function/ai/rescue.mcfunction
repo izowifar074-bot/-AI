@@ -1,23 +1,24 @@
 # ============================================================
 # smartz:ai/rescue — 浮空自救（executor = 尸壳，每 4gt 由 core 调用）
-# 触发：真正浮空（脚下 1~3 格皆空）+ 已连续下落 >=3 格 + 冷却就绪
-#        + 目标不在正下方。
-#   —— FallDistance>=3 是关键：排除小跳/短坠的半空乱铺（只在确实
-#      坠入深坑/悬崖时才救），修"空中放方块"。
+# 触发（即时，不等下落）：真正浮空（脚下 1~3 格皆空）+ 高度危险
+#   （脚下 4 格内无安全落点 = 会摔痛/坠深坑/踩危险）+ 冷却就绪
+#   + 目标不在正下方。
 #   —— 无击退(noKB)等导致尸壳站在地上时脚下非空，不会触发，属正常。
 #   —— 目标在正下方时让位给 descend（跳崖下追），避免半空乱铺打断跳杀。
 # 方法（方形气球，纯位置步进无新实体）：以脚为中心，4 个基向同步
-# 向外膨胀，逐格探测（feet 级撞墙 或 feet-1/-2/-3 有落点即命中）；
-# 取最先命中的方向（切比雪夫最近），沿该方向在 feet-1 铺一条笔直
-# 方块路径直达命中处，尸壳落桥走向生路。
+# 向外膨胀，只认 feet-1 同层的实体方块作落点——保证 feet-1 铺的桥
+# 必定面对面连上目标，绝不悬空凭空放置。取最近命中方向，沿该方向
+# 在 feet-1 铺一条笔直方块路径直达命中处，尸壳落桥走向生路。
 # ============================================================
 execute if score @s sz.cool matches 1.. run return 0
 execute unless block ~ ~-1 ~ #minecraft:replaceable run return 0
 execute unless block ~ ~-2 ~ #minecraft:replaceable run return 0
 execute unless block ~ ~-3 ~ #minecraft:replaceable run return 0
-# 已连续下落 >=3 格才救（排除小跳/短坠导致的半空乱铺）
-execute store result score #fd sz.ai run data get entity @s FallDistance 1
-execute if score #fd sz.ai matches ..2 run return 0
+# 危险高度：脚下 4 格内有安全落点(#land=1)则不救（短坠可承受）
+scoreboard players set #land sz.ai 0
+scoreboard players set #dropw sz.ai 4
+execute positioned ~ ~-1 ~ run function smartz:ai/drop_probe
+execute if score #land sz.ai matches 1 run return 0
 # 目标在正下方（descend 的主动跳杀场景）→ 让位，任其下落
 scoreboard players set #go sz.ai 0
 execute on target run scoreboard players set #go sz.ai 1
